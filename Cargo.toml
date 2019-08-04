@@ -1,0 +1,9 @@
+[package]
+name = "AESCrate"
+version = "0.1.0"
+authors = ["apple <tynr426@126.com>"]
+edition = "2018"
+
+[dependencies]
+rust-crypto = "^0.2"
+rand = "0.3.0"
