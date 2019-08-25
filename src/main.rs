@@ -5,9 +5,56 @@ use crypto::{symmetriccipher,buffer,aes,blockmodes};
 use crypto::aessafe::*;
 use crypto::blockmodes::*;
 use crypto::symmetriccipher::*;
-
+extern crate base64;
+use std::{thread, time};
 fn main() {
-    println!("Hello, world!");
+    let sleep_seconds = time::Duration::from_secs(1000);
+    let message = "I love Rust,Julia & Python, they are so cool! ";
+
+    let mut key: [u8; 32] = [0; 32];
+    let mut iv: [u8; 16] = [0; 16];
+
+    let mut rng = OsRng::new().ok().unwrap();
+    rng.fill_bytes(&mut key);
+    rng.fill_bytes(&mut iv);
+    println!("key:{:?}", key);
+    println!("iv:{:?}", iv);
+
+    let encrypted_data = aes256_cbc_encrypt(message.as_bytes(), &key, &iv).ok().unwrap();
+  
+    let message_bytes = message.as_bytes();
+    println!(
+        "message->as_bytes:{:?}, byte_len:{}",
+        message_bytes,
+        message_bytes.len()
+    );
+    println!(
+        "message->encrypted:{:?} byte_len:{}",
+        encrypted_data,
+        encrypted_data.len()
+    );
+
+    let decrypted_data = aes256_cbc_decrypt(&encrypted_data[..], &key, &iv).ok().unwrap();
+
+
+    let the_string = str::from_utf8(&decrypted_data).expect("not UTF-8");
+
+    assert!(message_bytes == &decrypted_data[..]);
+
+    assert!(message == the_string);
+
+    println!("the_string:{:?}", the_string);
+      let mut buf = String::new();
+    base64::encode_config_buf(encrypted_data, base64::STANDARD, &mut buf);
+    let mut buffer = Vec::<u8>::new();
+    base64::decode_config_buf(buf, base64::STANDARD, &mut buffer).unwrap();
+    println!("{:?}", buffer);
+
+    buffer.clear();
+
+
+
+    thread::sleep(sleep_seconds);
 }
 pub fn aes_cbc_mode(){
     let message="Hello World!";
@@ -29,9 +76,9 @@ pub fn aes_cbc_mode(){
     let decrypted_data=aes256_cbc_decrypt(&encrypted_data[..],&key,&iv).ok().unwrap();
 
     let crypt_message=str::from_utf8(decrypted_data.as_slice()).unwrap();
-
+    let crypt_encrypty=str::from_utf8(encrypted_data.as_slice()).unwrap();
     assert_eq!(message,crypt_message);
-    println!("{}",crypt_message);
+    println!("{},crypt_encrypty={:?}",crypt_message,crypt_encrypty);
 }
 
 // Encrypt a buffer with the given key and iv using AES-256/CBC/Pkcs encryption.
