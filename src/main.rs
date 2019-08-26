@@ -19,41 +19,22 @@ fn main() {
     rng.fill_bytes(&mut iv);
     println!("key:{:?}", key);
     println!("iv:{:?}", iv);
-
+    //aes 加密
     let encrypted_data = aes256_cbc_encrypt(message.as_bytes(), &key, &iv).ok().unwrap();
   
-    let message_bytes = message.as_bytes();
-    println!(
-        "message->as_bytes:{:?}, byte_len:{}",
-        message_bytes,
-        message_bytes.len()
-    );
-    println!(
-        "message->encrypted:{:?} byte_len:{}",
-        encrypted_data,
-        encrypted_data.len()
-    );
+    //编码成base64
+    let mut base64_encode = String::new();
+    base64::encode_config_buf(&encrypted_data, base64::STANDARD, &mut base64_encode);
 
-    let decrypted_data = aes256_cbc_decrypt(&encrypted_data[..], &key, &iv).ok().unwrap();
-
-
+    let mut base64_decode = Vec::<u8>::new();
+    base64::decode_config_buf(&base64_encode, base64::STANDARD, &mut base64_decode).unwrap();
+    println!("base64_encode={:?}base64_decode={:?}",base64_encode, base64_decode);
+    // aes 解码
+    let decrypted_data = aes256_cbc_decrypt(&base64_decode[..], &key, &iv).ok().unwrap();
+    //转换成string
     let the_string = str::from_utf8(&decrypted_data).expect("not UTF-8");
-
-    assert!(message_bytes == &decrypted_data[..]);
-
-    assert!(message == the_string);
-
-    println!("the_string:{:?}", the_string);
-      let mut buf = String::new();
-    base64::encode_config_buf(encrypted_data, base64::STANDARD, &mut buf);
-    let mut buffer = Vec::<u8>::new();
-    base64::decode_config_buf(buf, base64::STANDARD, &mut buffer).unwrap();
-    println!("{:?}", buffer);
-
-    buffer.clear();
-
-
-
+    println!("decrypted_data={:?}",the_string);
+    
     thread::sleep(sleep_seconds);
 }
 pub fn aes_cbc_mode(){
