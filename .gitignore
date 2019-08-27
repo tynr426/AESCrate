@@ -1,7 +1,7 @@
 .DS_Store
 
 **/tagert/
-
+/node_modules
 /target
 **/*.rs.bk
 
